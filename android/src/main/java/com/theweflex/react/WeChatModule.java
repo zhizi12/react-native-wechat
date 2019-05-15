@@ -33,6 +33,7 @@ import com.tencent.mm.sdk.modelmsg.SendMessageToWX;
 import com.tencent.mm.sdk.modelmsg.WXFileObject;
 import com.tencent.mm.sdk.modelmsg.WXImageObject;
 import com.tencent.mm.sdk.modelmsg.WXMediaMessage;
+import com.tencent.mm.opensdk.modelmsg.WXMiniProgramObject;
 import com.tencent.mm.sdk.modelmsg.WXMusicObject;
 import com.tencent.mm.sdk.modelmsg.WXTextObject;
 import com.tencent.mm.sdk.modelmsg.WXVideoObject;
@@ -212,19 +213,19 @@ public class WeChatModule extends ReactContextBaseJavaModule implements IWXAPIEv
 
     private void _share(final int scene, final ReadableMap data, final Callback callback) {
         Uri uri = null;
-        if (data.hasKey("thumbImage")) {
-            String imageUrl = data.getString("thumbImage");
+        if (data.hasKey("thumbImage") || data.hasKey("hdImageData")) {
+                    String imageUrl = data.hasKey("hdImageData") ? data.getString("hdImageData") : data.getString("thumbImage");
 
-            try {
-                uri = Uri.parse(imageUrl);
-                // Verify scheme is set, so that relative uri (used by static resources) are not handled.
-                if (uri.getScheme() == null) {
-                    uri = getResourceDrawableUri(getReactApplicationContext(), imageUrl);
+                    try {
+                        uri = Uri.parse(imageUrl);
+                        // Verify scheme is set, so that relative uri (used by static resources) are not handled.
+                        if (uri.getScheme() == null) {
+                            uri = getResourceDrawableUri(getReactApplicationContext(), imageUrl);
+                        }
+                    } catch (Exception e) {
+                        // ignore malformed uri, then attempt to extract resource ID.
+                    }
                 }
-            } catch (Exception e) {
-                // ignore malformed uri, then attempt to extract resource ID.
-            }
-        }
 
         if (uri != null) {
             this._getImage(uri, new ResizeOptions(100, 100), new ImageCallback() {
