@@ -70,7 +70,7 @@ RCT_EXPORT_METHOD(registerAppWithDescription:(NSString *)appid
                   :(NSString *)appdesc
                   :(RCTResponseSenderBlock)callback)
 {
-    callback(@[[WXApi registerApp:appid withDescription:appdesc] ? [NSNull null] : INVOKE_FAILED]);
+    callback(@[[WXApi registerApp:appid ] ? [NSNull null] : INVOKE_FAILED]);
 }
 
 RCT_EXPORT_METHOD(isWXAppInstalled:(RCTResponseSenderBlock)callback)
@@ -285,7 +285,26 @@ RCT_EXPORT_METHOD(pay:(NSDictionary *)data
                                        MediaTag:mediaTagName
                                        callBack:callback];
 
-        } else {
+        } else if ([type isEqualToString:RCTWXShareTypeMini]) {
+                      WXMiniProgramObject *miniObject = [WXMiniProgramObject object];
+                      miniObject.webpageUrl = aData[@"webpageUrl"];
+                      miniObject.userName = aData[@"userName"];
+                      miniObject.path = aData[@"path"];
+                      miniObject.withShareTicket = [aData[@"withShareTicket"] boolValue];
+                      miniObject.miniProgramType = [aData[@"miniProgramType"] integerValue];
+                      miniObject.hdImageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:aData[@"hdImageData"]]] ;
+
+                      [self shareToWeixinWithMediaMessage:aScene
+                                                    Title:title
+                                              Description:description
+                                                   Object:miniObject
+                                               MessageExt:messageExt
+                                            MessageAction:messageAction
+                                               ThumbImage:aThumbImage
+                                                 MediaTag:mediaTagName
+                                                 callBack:callback];
+
+                  } else {
             callback(@[@"message type unsupported"]);
         }
     }
