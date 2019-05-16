@@ -1,9 +1,8 @@
-package com.wechat_android; //todo: 换成你的包名
+package com.theweflex.react;
 
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 
@@ -27,24 +26,28 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.tencent.mm.opensdk.constants.Build;
+import com.tencent.mm.opensdk.constants.ConstantsAPI;
 import com.tencent.mm.opensdk.modelbase.BaseReq;
 import com.tencent.mm.opensdk.modelbase.BaseResp;
-import com.tencent.mm.opensdk.modelbiz.WXLaunchMiniProgram;
 import com.tencent.mm.opensdk.modelmsg.SendAuth;
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX;
 import com.tencent.mm.opensdk.modelmsg.WXFileObject;
 import com.tencent.mm.opensdk.modelmsg.WXImageObject;
 import com.tencent.mm.opensdk.modelmsg.WXMediaMessage;
+import com.tencent.mm.opensdk.modelbiz.WXLaunchMiniProgram;
+import com.tencent.mm.opensdk.modelmsg.WXMiniProgramObject;
 import com.tencent.mm.opensdk.modelmsg.WXMusicObject;
 import com.tencent.mm.opensdk.modelmsg.WXTextObject;
 import com.tencent.mm.opensdk.modelmsg.WXVideoObject;
 import com.tencent.mm.opensdk.modelmsg.WXWebpageObject;
-import com.tencent.mm.opensdk.modelmsg.WXMiniProgramObject;
 import com.tencent.mm.opensdk.modelpay.PayReq;
 import com.tencent.mm.opensdk.modelpay.PayResp;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler;
 import com.tencent.mm.opensdk.openapi.WXAPIFactory;
+import com.tencent.mm.opensdk.utils.Log;
+
 
 import java.io.File;
 import java.net.URI;
@@ -72,13 +75,11 @@ public class WeChatModule extends ReactContextBaseJavaModule implements IWXAPIEv
     }
 
     /**
-     * fix Native module WeChatModule tried to override WeChatModule for module name
-     * RCTWeChat. If this was your intention, return true from
-     * WeChatModule#canOverrideExistingModule() bug
-     *
+     * fix Native module WeChatModule tried to override WeChatModule for module name RCTWeChat.
+     * If this was your intention, return true from WeChatModule#canOverrideExistingModule() bug
      * @return
      */
-    public boolean canOverrideExistingModule() {
+    public boolean canOverrideExistingModule(){
         return true;
     }
 
@@ -122,13 +123,86 @@ public class WeChatModule extends ReactContextBaseJavaModule implements IWXAPIEv
     }
 
     @ReactMethod
-    public void isWXAppSupportApi(Callback callback) {
-        if (api == null) {
-            callback.invoke(NOT_REGISTERED);
-            return;
+    public void isWXAppSupportApi(String supportApi,Callback callback) {
+            if (api == null) {
+                callback.invoke(NOT_REGISTERED);
+                return;
+            }
+            int supportSDKINT = Build.PAY_SUPPORTED_SDK_INT;
+            switch (supportApi) {
+                case "SDK_INT":
+                    supportSDKINT = Build.SDK_INT;
+                    break;
+                case "MIN_SDK_INT":
+                    supportSDKINT = Build.MIN_SDK_INT;
+                    break;
+                case "CHECK_TOKEN_SDK_INT":
+                    supportSDKINT = Build.CHECK_TOKEN_SDK_INT;
+                    break;
+                case "TIMELINE_SUPPORTED_SDK_INT":
+                    supportSDKINT = Build.TIMELINE_SUPPORTED_SDK_INT;
+                    break;
+                case "EMOJI_SUPPORTED_SDK_INT":
+                    supportSDKINT = Build.EMOJI_SUPPORTED_SDK_INT;
+                    break;
+                case "MUSIC_DATA_URL_SUPPORTED_SDK_INT":
+                    supportSDKINT = Build.MUSIC_DATA_URL_SUPPORTED_SDK_INT;
+                    break;
+                case "PAY_SUPPORTED_SDK_INT":
+                    supportSDKINT = Build.PAY_SUPPORTED_SDK_INT;
+                    break;
+                case "OPENID_SUPPORTED_SDK_INT":
+                    supportSDKINT = Build.OPENID_SUPPORTED_SDK_INT;
+                    break;
+                case "FAVORITE_SUPPPORTED_SDK_INT":
+                    supportSDKINT = Build.FAVORITE_SUPPPORTED_SDK_INT;
+                    break;
+                case "MESSAGE_ACTION_SUPPPORTED_SDK_INT":
+                    supportSDKINT = Build.MESSAGE_ACTION_SUPPPORTED_SDK_INT;
+                    break;
+                case "SCAN_QRCODE_AUTH_SUPPORTED_SDK_INT":
+                    supportSDKINT = Build.SCAN_QRCODE_AUTH_SUPPORTED_SDK_INT;
+                    break;
+                case "MINIPROGRAM_SUPPORTED_SDK_INT":
+                    supportSDKINT = Build.MINIPROGRAM_SUPPORTED_SDK_INT;
+                    break;
+                case "VIDEO_FILE_SUPPORTED_SDK_INT":
+                    supportSDKINT = Build.VIDEO_FILE_SUPPORTED_SDK_INT;
+                    break;
+                case "SUBSCRIBE_MESSAGE_SUPPORTED_SDK_INT":
+                    supportSDKINT = Build.SUBSCRIBE_MESSAGE_SUPPORTED_SDK_INT;
+                    break;
+                case "LAUNCH_MINIPROGRAM_SUPPORTED_SDK_INT":
+                    supportSDKINT = Build.LAUNCH_MINIPROGRAM_SUPPORTED_SDK_INT;
+                    break;
+                case "CHOOSE_INVOICE_TILE_SUPPORT_SDK_INT":
+                    supportSDKINT = Build.CHOOSE_INVOICE_TILE_SUPPORT_SDK_INT;
+                    break;
+                case "INVOICE_AUTH_INSERT_SDK_INT":
+                    supportSDKINT = Build.INVOICE_AUTH_INSERT_SDK_INT;
+                    break;
+                case "NON_TAX_PAY_SDK_INT":
+                    supportSDKINT = Build.NON_TAX_PAY_SDK_INT;
+                    break;
+                case "PAY_INSURANCE_SDK_INT":
+                    supportSDKINT = Build.PAY_INSURANCE_SDK_INT;
+                    break;
+                case "SUBSCRIBE_MINI_PROGRAM_MSG_SUPPORTED_SDK_INT":
+                    supportSDKINT = Build.SUBSCRIBE_MINI_PROGRAM_MSG_SUPPORTED_SDK_INT;
+                    break;
+                case "OFFLINE_PAY_SDK_INT":
+                    supportSDKINT = Build.OFFLINE_PAY_SDK_INT;
+                    break;
+                case "SEND_TO_SPECIFIED_CONTACT_SDK_INT":
+                    supportSDKINT = Build.SEND_TO_SPECIFIED_CONTACT_SDK_INT;
+                    break;
+                case "OPEN_BUSINESS_WEBVIEW_SDK_INT":
+                    supportSDKINT = Build.OPEN_BUSINESS_WEBVIEW_SDK_INT;
+                    break;
+            }
+            boolean isWXAppSupportAPI = api.getWXAppSupportAPI() >= supportSDKINT;
+            callback.invoke(null, isWXAppSupportAPI);
         }
-        callback.invoke(null, api.isWXAppSupportAPI());
-    }
 
     @ReactMethod
     public void getApiVersion(Callback callback) {
@@ -188,7 +262,7 @@ public class WeChatModule extends ReactContextBaseJavaModule implements IWXAPIEv
     }
 
     @ReactMethod
-    public void pay(ReadableMap data, Callback callback) {
+    public void pay(ReadableMap data, Callback callback){
         PayReq payReq = new PayReq();
         if (data.hasKey("partnerId")) {
             payReq.partnerId = data.getString("partnerId");
@@ -222,8 +296,7 @@ public class WeChatModule extends ReactContextBaseJavaModule implements IWXAPIEv
 
             try {
                 uri = Uri.parse(imageUrl);
-                // Verify scheme is set, so that relative uri (used by static resources) are not
-                // handled.
+                // Verify scheme is set, so that relative uri (used by static resources) are not handled.
                 if (uri.getScheme() == null) {
                     uri = getResourceDrawableUri(getReactApplicationContext(), imageUrl);
                 }
@@ -274,12 +347,18 @@ public class WeChatModule extends ReactContextBaseJavaModule implements IWXAPIEv
             return null;
         }
         name = name.toLowerCase().replace("-", "_");
-        int resId = context.getResources().getIdentifier(name, "drawable", context.getPackageName());
+        int resId = context.getResources().getIdentifier(
+                name,
+                "drawable",
+                context.getPackageName());
 
         if (resId == 0) {
             return null;
         } else {
-            return new Uri.Builder().scheme(UriUtil.LOCAL_RESOURCE_SCHEME).path(String.valueOf(resId)).build();
+            return new Uri.Builder()
+                    .scheme(UriUtil.LOCAL_RESOURCE_SCHEME)
+                    .path(String.valueOf(resId))
+                    .build();
         }
     }
 
@@ -326,19 +405,7 @@ public class WeChatModule extends ReactContextBaseJavaModule implements IWXAPIEv
         } else if (type.equals("file")) {
             mediaObject = __jsonToFileMedia(data);
         } else if (type.equals("miniProgram")) {
-            __jsonToMiniProgramMedia(data, new MiniObjectCallback() {
-                @Override
-                public void invoke(@Nullable WXMediaMessage.IMediaObject mediaObject, @Nullable Bitmap bitmap) {
-                    if (mediaObject == null) {
-                        callback.invoke(INVALID_ARGUMENT);
-                    } else {
-                        WeChatModule.this._share(scene, data, bitmap, mediaObject, callback);
-                    }
-                }
-            });
-            return;
-            // mediaObject = _jsonToMiniProgram(data);
-            // thumbImage = BitmapFactory.decodeResource(getReactApplicationContext(), R.mipmap.icon64_appwx_logo); //在路径android/app/src/main/res/mipmap-xhdpi/下添加小程序图片icon64_appwx_logo.png
+            mediaObject = __jsonToMiniProgramMedia(data);
         }
 
         if (mediaObject == null) {
@@ -348,8 +415,21 @@ public class WeChatModule extends ReactContextBaseJavaModule implements IWXAPIEv
         }
     }
 
-    private void _share(int scene, ReadableMap data, Bitmap thumbImage, WXMediaMessage.IMediaObject mediaObject,
-            Callback callback) {
+
+        private WXMiniProgramObject __jsonToMiniProgramMedia(ReadableMap data) {
+            if (!data.hasKey("userName")) {
+                return null;
+            }
+            WXMiniProgramObject miniProgramObj = new WXMiniProgramObject();
+            miniProgramObj.webpageUrl = data.getString("webpageUrl"); // 兼容低版本的网页链接
+            miniProgramObj.userName = data.getString("userName");    // 小程序原始id
+            miniProgramObj.path = data.getString("path");         //小程序页面路径
+            return miniProgramObj;
+        }
+
+
+
+    private void _share(int scene, ReadableMap data, Bitmap thumbImage, WXMediaMessage.IMediaObject mediaObject, Callback callback) {
 
         WXMediaMessage message = new WXMediaMessage();
         message.mediaObject = mediaObject;
@@ -408,8 +488,7 @@ public class WeChatModule extends ReactContextBaseJavaModule implements IWXAPIEv
         Uri imageUri;
         try {
             imageUri = Uri.parse(imageUrl);
-            // Verify scheme is set, so that relative uri (used by static resources) are not
-            // handled.
+            // Verify scheme is set, so that relative uri (used by static resources) are not handled.
             if (imageUri.getScheme() == null) {
                 imageUri = getResourceDrawableUri(getReactApplicationContext(), imageUrl);
             }
@@ -479,58 +558,7 @@ public class WeChatModule extends ReactContextBaseJavaModule implements IWXAPIEv
         return new WXFileObject(data.getString("filePath"));
     }
 
-    private void __jsonToMiniProgramMedia(final ReadableMap data, final MiniObjectCallback callback) {
-        if (!data.hasKey("imageUrl")) {
-            callback.invoke(null, null);
-            return;
-        }
-        String imageUrl = data.getString("imageUrl");
-        Uri imageUri;
-        try {
-            imageUri = Uri.parse(imageUrl);
-            // Verify scheme is set, so that relative uri (used by static resources) are not
-            // handled.
-            if (imageUri.getScheme() == null) {
-                imageUri = getResourceDrawableUri(getReactApplicationContext(), imageUrl);
-            }
-        } catch (Exception e) {
-            imageUri = null;
-        }
-
-        if (imageUri == null) {
-            callback.invoke(null, null);
-            return;
-        }
-
-        this._getImage(imageUri, null, new ImageCallback() {
-            @Override
-            public void invoke(@Nullable Bitmap bitmap) {
-                WXMiniProgramObject ret = new WXMiniProgramObject();
-                ret.webpageUrl = data.getString("webpageUrl");
-                ret.userName = data.getString("userName");
-                ret.path = data.getString("path");
-                callback.invoke(bitmap == null ? null : ret, bitmap);
-            }
-        });
-    }
-
-    @ReactMethod
-    public void launchMini(ReadableMap data, Callback callback) {
-        if (api == null) {
-            callback.invoke(NOT_REGISTERED);
-            return;
-        }
-        WXLaunchMiniProgram.Req req = new WXLaunchMiniProgram.Req();
-        req.userName = data.getString("userName"); //填小程序原始id
-        req.path = data.getString("path"); //拉起小程序页面的可带参路径，不填默认拉起小程序首页
-        req.miniprogramType = data.getInt("miniProgramType"); //可选打开开发版、体验版和正式版
-//        req.miniprogramType = WXLaunchMiniProgram.Req.MINIPTOGRAM_TYPE_RELEASE; //可选打开开发版、体验版和正式版
-        boolean success = api.sendReq(req);
-        if (!success) callback.invoke(INVALID_ARGUMENT);
-    }
-
-    // TODO:
-    // 实现sendRequest、sendSuccessResponse、sendErrorCommonResponse、sendErrorUserCancelResponse
+    // TODO: 实现sendRequest、sendSuccessResponse、sendErrorCommonResponse、sendErrorUserCancelResponse
 
     @Override
     public void onReq(BaseReq baseReq) {
@@ -563,7 +591,8 @@ public class WeChatModule extends ReactContextBaseJavaModule implements IWXAPIEv
             map.putString("returnKey", resp.returnKey);
         }
 
-        this.getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+        this.getReactApplicationContext()
+                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                 .emit("WeChat_Resp", map);
     }
 
@@ -575,7 +604,5 @@ public class WeChatModule extends ReactContextBaseJavaModule implements IWXAPIEv
         void invoke(@Nullable WXMediaMessage.IMediaObject mediaObject);
     }
 
-    private interface MiniObjectCallback {
-        void invoke(@Nullable WXMediaMessage.IMediaObject mediaObject, @Nullable Bitmap bitmap);
-    }
 }
+
