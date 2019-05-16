@@ -404,7 +404,7 @@ public class WeChatModule extends ReactContextBaseJavaModule implements IWXAPIEv
             mediaObject = __jsonToMusicMedia(data);
         } else if (type.equals("file")) {
             mediaObject = __jsonToFileMedia(data);
-        } else if (type.equals("miniProgram")) {
+        } else if (type.equals("mini")) {
             mediaObject = __jsonToMiniProgramMedia(data);
         }
 
