@@ -1,8 +1,9 @@
-package com.theweflex.react;
+package com.wechat_android; //todo: 换成你的包名
 
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 
@@ -26,27 +27,24 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
-import com.tencent.mm.opensdk.constants.Build;
-import com.tencent.mm.opensdk.constants.ConstantsAPI;
 import com.tencent.mm.opensdk.modelbase.BaseReq;
 import com.tencent.mm.opensdk.modelbase.BaseResp;
+import com.tencent.mm.opensdk.modelbiz.WXLaunchMiniProgram;
 import com.tencent.mm.opensdk.modelmsg.SendAuth;
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX;
 import com.tencent.mm.opensdk.modelmsg.WXFileObject;
 import com.tencent.mm.opensdk.modelmsg.WXImageObject;
 import com.tencent.mm.opensdk.modelmsg.WXMediaMessage;
-import com.tencent.mm.opensdk.modelbiz.WXLaunchMiniProgram;
-import com.tencent.mm.opensdk.modelmsg.WXMiniProgramObject;
 import com.tencent.mm.opensdk.modelmsg.WXMusicObject;
 import com.tencent.mm.opensdk.modelmsg.WXTextObject;
 import com.tencent.mm.opensdk.modelmsg.WXVideoObject;
 import com.tencent.mm.opensdk.modelmsg.WXWebpageObject;
+import com.tencent.mm.opensdk.modelmsg.WXMiniProgramObject;
 import com.tencent.mm.opensdk.modelpay.PayReq;
 import com.tencent.mm.opensdk.modelpay.PayResp;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler;
 import com.tencent.mm.opensdk.openapi.WXAPIFactory;
-import com.tencent.mm.opensdk.utils.Log;
 
 import java.io.File;
 import java.net.URI;
@@ -74,11 +72,13 @@ public class WeChatModule extends ReactContextBaseJavaModule implements IWXAPIEv
     }
 
     /**
-     * fix Native module WeChatModule tried to override WeChatModule for module name RCTWeChat.
-     * If this was your intention, return true from WeChatModule#canOverrideExistingModule() bug
+     * fix Native module WeChatModule tried to override WeChatModule for module name
+     * RCTWeChat. If this was your intention, return true from
+     * WeChatModule#canOverrideExistingModule() bug
+     *
      * @return
      */
-    public boolean canOverrideExistingModule(){
+    public boolean canOverrideExistingModule() {
         return true;
     }
 
@@ -123,12 +123,11 @@ public class WeChatModule extends ReactContextBaseJavaModule implements IWXAPIEv
 
     @ReactMethod
     public void isWXAppSupportApi(Callback callback) {
-         if (api == null) {
-                   callback.invoke(NOT_REGISTERED);
-                   return;
-               }
-               callback.invoke(null, api.isWXAppSupportAPI());
-           }
+        if (api == null) {
+            callback.invoke(NOT_REGISTERED);
+            return;
+        }
+        callback.invoke(null, api.isWXAppSupportAPI());
     }
 
     @ReactMethod
@@ -178,7 +177,7 @@ public class WeChatModule extends ReactContextBaseJavaModule implements IWXAPIEv
         }
         _share(SendMessageToWX.Req.WXSceneSession, data, callback);
     }
-    
+
     @ReactMethod
     public void shareToFavorite(ReadableMap data, Callback callback) {
         if (api == null) {
@@ -189,7 +188,7 @@ public class WeChatModule extends ReactContextBaseJavaModule implements IWXAPIEv
     }
 
     @ReactMethod
-    public void pay(ReadableMap data, Callback callback){
+    public void pay(ReadableMap data, Callback callback) {
         PayReq payReq = new PayReq();
         if (data.hasKey("partnerId")) {
             payReq.partnerId = data.getString("partnerId");
@@ -223,7 +222,8 @@ public class WeChatModule extends ReactContextBaseJavaModule implements IWXAPIEv
 
             try {
                 uri = Uri.parse(imageUrl);
-                // Verify scheme is set, so that relative uri (used by static resources) are not handled.
+                // Verify scheme is set, so that relative uri (used by static resources) are not
+                // handled.
                 if (uri.getScheme() == null) {
                     uri = getResourceDrawableUri(getReactApplicationContext(), imageUrl);
                 }
@@ -274,18 +274,12 @@ public class WeChatModule extends ReactContextBaseJavaModule implements IWXAPIEv
             return null;
         }
         name = name.toLowerCase().replace("-", "_");
-        int resId = context.getResources().getIdentifier(
-                name,
-                "drawable",
-                context.getPackageName());
+        int resId = context.getResources().getIdentifier(name, "drawable", context.getPackageName());
 
         if (resId == 0) {
             return null;
         } else {
-            return new Uri.Builder()
-                    .scheme(UriUtil.LOCAL_RESOURCE_SCHEME)
-                    .path(String.valueOf(resId))
-                    .build();
+            return new Uri.Builder().scheme(UriUtil.LOCAL_RESOURCE_SCHEME).path(String.valueOf(resId)).build();
         }
     }
 
@@ -332,7 +326,19 @@ public class WeChatModule extends ReactContextBaseJavaModule implements IWXAPIEv
         } else if (type.equals("file")) {
             mediaObject = __jsonToFileMedia(data);
         } else if (type.equals("miniProgram")) {
-                     mediaObject = __jsonToMiniProgramMedia(data);
+            __jsonToMiniProgramMedia(data, new MiniObjectCallback() {
+                @Override
+                public void invoke(@Nullable WXMediaMessage.IMediaObject mediaObject, @Nullable Bitmap bitmap) {
+                    if (mediaObject == null) {
+                        callback.invoke(INVALID_ARGUMENT);
+                    } else {
+                        WeChatModule.this._share(scene, data, bitmap, mediaObject, callback);
+                    }
+                }
+            });
+            return;
+            // mediaObject = _jsonToMiniProgram(data);
+            // thumbImage = BitmapFactory.decodeResource(getReactApplicationContext(), R.mipmap.icon64_appwx_logo); //在路径android/app/src/main/res/mipmap-xhdpi/下添加小程序图片icon64_appwx_logo.png
         }
 
         if (mediaObject == null) {
@@ -342,21 +348,8 @@ public class WeChatModule extends ReactContextBaseJavaModule implements IWXAPIEv
         }
     }
 
-
-
-  private WXMiniProgramObject __jsonToMiniProgramMedia(ReadableMap data) {
-        if (!data.hasKey("userName")) {
-            return null;
-        }
-        WXMiniProgramObject miniProgramObj = new WXMiniProgramObject();
-        miniProgramObj.webpageUrl = data.getString("webpageUrl"); // 兼容低版本的网页链接
-        miniProgramObj.userName = data.getString("userName");    // 小程序原始id
-        miniProgramObj.path = data.getString("path");         //小程序页面路径
-        return miniProgramObj;
-    }
-
-
-    private void _share(int scene, ReadableMap data, Bitmap thumbImage, WXMediaMessage.IMediaObject mediaObject, Callback callback) {
+    private void _share(int scene, ReadableMap data, Bitmap thumbImage, WXMediaMessage.IMediaObject mediaObject,
+            Callback callback) {
 
         WXMediaMessage message = new WXMediaMessage();
         message.mediaObject = mediaObject;
@@ -415,7 +408,8 @@ public class WeChatModule extends ReactContextBaseJavaModule implements IWXAPIEv
         Uri imageUri;
         try {
             imageUri = Uri.parse(imageUrl);
-            // Verify scheme is set, so that relative uri (used by static resources) are not handled.
+            // Verify scheme is set, so that relative uri (used by static resources) are not
+            // handled.
             if (imageUri.getScheme() == null) {
                 imageUri = getResourceDrawableUri(getReactApplicationContext(), imageUrl);
             }
@@ -485,7 +479,58 @@ public class WeChatModule extends ReactContextBaseJavaModule implements IWXAPIEv
         return new WXFileObject(data.getString("filePath"));
     }
 
-    // TODO: 实现sendRequest、sendSuccessResponse、sendErrorCommonResponse、sendErrorUserCancelResponse
+    private void __jsonToMiniProgramMedia(final ReadableMap data, final MiniObjectCallback callback) {
+        if (!data.hasKey("imageUrl")) {
+            callback.invoke(null, null);
+            return;
+        }
+        String imageUrl = data.getString("imageUrl");
+        Uri imageUri;
+        try {
+            imageUri = Uri.parse(imageUrl);
+            // Verify scheme is set, so that relative uri (used by static resources) are not
+            // handled.
+            if (imageUri.getScheme() == null) {
+                imageUri = getResourceDrawableUri(getReactApplicationContext(), imageUrl);
+            }
+        } catch (Exception e) {
+            imageUri = null;
+        }
+
+        if (imageUri == null) {
+            callback.invoke(null, null);
+            return;
+        }
+
+        this._getImage(imageUri, null, new ImageCallback() {
+            @Override
+            public void invoke(@Nullable Bitmap bitmap) {
+                WXMiniProgramObject ret = new WXMiniProgramObject();
+                ret.webpageUrl = data.getString("webpageUrl");
+                ret.userName = data.getString("userName");
+                ret.path = data.getString("path");
+                callback.invoke(bitmap == null ? null : ret, bitmap);
+            }
+        });
+    }
+
+    @ReactMethod
+    public void launchMini(ReadableMap data, Callback callback) {
+        if (api == null) {
+            callback.invoke(NOT_REGISTERED);
+            return;
+        }
+        WXLaunchMiniProgram.Req req = new WXLaunchMiniProgram.Req();
+        req.userName = data.getString("userName"); //填小程序原始id
+        req.path = data.getString("path"); //拉起小程序页面的可带参路径，不填默认拉起小程序首页
+        req.miniprogramType = data.getInt("miniProgramType"); //可选打开开发版、体验版和正式版
+//        req.miniprogramType = WXLaunchMiniProgram.Req.MINIPTOGRAM_TYPE_RELEASE; //可选打开开发版、体验版和正式版
+        boolean success = api.sendReq(req);
+        if (!success) callback.invoke(INVALID_ARGUMENT);
+    }
+
+    // TODO:
+    // 实现sendRequest、sendSuccessResponse、sendErrorCommonResponse、sendErrorUserCancelResponse
 
     @Override
     public void onReq(BaseReq baseReq) {
@@ -518,8 +563,7 @@ public class WeChatModule extends ReactContextBaseJavaModule implements IWXAPIEv
             map.putString("returnKey", resp.returnKey);
         }
 
-        this.getReactApplicationContext()
-                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+        this.getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                 .emit("WeChat_Resp", map);
     }
 
@@ -531,4 +575,7 @@ public class WeChatModule extends ReactContextBaseJavaModule implements IWXAPIEv
         void invoke(@Nullable WXMediaMessage.IMediaObject mediaObject);
     }
 
+    private interface MiniObjectCallback {
+        void invoke(@Nullable WXMediaMessage.IMediaObject mediaObject, @Nullable Bitmap bitmap);
+    }
 }
